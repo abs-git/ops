@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "selector.fullname" . }}-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "selector.name" . }}
+    chart: {{template "selector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  - port: 8001
+    targetPort: 8001
+    name: grpc
+  - port: 8002
+    targetPort: 8002
+    name: metrics
+  selector:
+    app: {{ template "selector.name" . }}
+    release: {{ .Release.Name }}

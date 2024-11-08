@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "selector.name" . }}
+    chart: {{ template "selector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "selector.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "selector.name" . }}
+        release: {{.Release.Name}}
+      annotations:
+        date: "{{ now | unixEpoch }}"
+    spec:
+      {{- if .Values.imagePullSecret }}
+      imagePullSecrets:
+      - name: {{.Values.imagePullSecret }}
+      {{ end }}
+      restartPolicy: {{ .Values.restartPolicy }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.deployment.image }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        command: ["bash", "-c", "/opt/app/server.py --verbose"]
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 8001
+          name: grpc
+        - containerPort: 8002
+          name: metrics
+        livenessProbe:
+          initialDelaySeconds: 180
+          periodSeconds: 10
+          httpGet:
+            path: /v2/health/live
+            port: http
+        readinessProbe:
+          initialDelaySeconds: 180
+          periodSeconds: 10
+          httpGet:
+            path: /v2/health/ready
+            port: http
+        resources:
+          requests:
+            nvidia.com/gpu: {{ .Values.deployment.numOfGPUs }}
+          limits:
+            nvidia.com/gpu: {{ .Values.deployment.numOfGPUs }}
+        volumeMounts:
+          - name: shared-memory
+            mountPath: /dev/shm
+      volumes:
+        - name: shared-memory
+          emptyDir:
+            medium: Memory

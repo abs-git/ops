@@ -1,0 +1,9 @@
+imagePullSecret: null
+pullPolicy: Always
+restartPolicy: Always
+replicaCount: 1
+deployment:
+  image: null
+  numOfGPUs: 1
+service:
+  type: ClusterIP

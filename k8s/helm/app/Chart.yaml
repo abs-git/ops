@@ -1,0 +1,5 @@
+apiVersion: v2
+description: Stable Diffusion 1.5 PyTriton Example
+name: stable-diffusion-example
+version: 0.0.1
+appVersion: 0.0.1
