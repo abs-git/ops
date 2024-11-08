@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-issuer
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+  name: grafana
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: grafana.entto.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - grafana.entto.shop
+    secretName: grafana.entto.shop-tls

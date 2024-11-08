@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  prometheus-stack:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-10-23T07:17:12.6097453+09:00"
+    description: this-is-prometheus-stack
+    digest: aecb3ee3c26264d1ea2dd3b7a6b89d58ded52f1a6bf96c68ee79e8ebc9c1c0e7
+    name: prometheus-stack
+    type: application
+    urls:
+    - prometheus-stack-0.1.4.tgz
+    version: 0.1.4
+generated: "2024-10-23T07:17:12.60935261+09:00"

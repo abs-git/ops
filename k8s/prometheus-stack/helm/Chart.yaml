@@ -1,0 +1,10 @@
+apiVersion: v2
+name: prometheus-stack
+description: this-is-prometheus-stack
+type: application
+
+# chart version.
+version: 0.1.5
+
+# app version.
+appVersion: "1.16.0"

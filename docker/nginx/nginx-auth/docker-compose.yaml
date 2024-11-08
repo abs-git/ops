@@ -1,0 +1,33 @@
+version: '3'
+services:
+  proxy-server:
+    image: fabiocicerchia/nginx-lua
+    ports:
+      - "8080:80"
+    volumes:
+      - ./proxy-server/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app-network
+
+  private-server:
+    image: fabiocicerchia/nginx-lua
+    ports:
+      - "8081:80"
+    volumes:
+      - ./private-server/html:/usr/share/nginx/html
+      - ./private-server/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app-network
+
+  auth-server:
+    image: fabiocicerchia/nginx-lua
+    ports:
+      - "8082:80"
+    volumes:
+      - ./auth-server/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

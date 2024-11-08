@@ -1,1 +1,6 @@
 jenkins_home
+local_home
+.*
+!.tmp
+!*.tgz
+devops-package

@@ -1,0 +1,17 @@
+version: '3.10'
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./local_home/grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning  # 프로비저닝 설정
+
+# volumes:
+#   grafana_data:
