@@ -1,0 +1,72 @@
+services:
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.54.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.size=1GB'
+    volumes:
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./prometheus/web.yaml:/etc/prometheus/web.yaml
+      - ./prometheus/alert.rules.yaml:/etc/prometheus/alert.rules.yaml
+      - ./local_home/prometheus_data:/prometheus
+    ports:
+      - '9090:9090'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--web.config.file=/etc/prometheus/web.yaml'
+    networks:
+      - prometheus
+    restart: always
+
+  pushgateway:
+    container_name: prometheus-pushgateway
+    image: prom/pushgateway:v1.9.0
+    ports:
+      - '9091:9091'
+    restart: always
+    networks:
+      - prometheus
+
+  dcgm-exporter:
+    container_name: dcgm-exporter
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.7-3.5.0-ubuntu22.04
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    environment:
+      - DCGM_EXPORTER_NO_HOSTNAME=1
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - '9400:9400'
+    restart: always
+    networks:
+      - prometheus
+
+  node-exporter:
+    container_name: node-exporter
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - '9100:9100'
+    restart: always
+    networks:
+      - prometheus
+
+networks:
+  prometheus:
+    name: prometheus
