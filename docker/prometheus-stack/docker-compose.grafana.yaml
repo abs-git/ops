@@ -1,7 +1,5 @@
-version: '3.10'
-
 services:
-  # https://github.com/Einsteinish/Docker-Compose-Prometheus-and-Grafana
+
   grafana:
     image: grafana/grafana:latest
     build:
@@ -22,15 +20,19 @@ services:
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - prometheus
 
   promtail:
     image: grafana/promtail:2.9.2
     container_name: promtail
     volumes:
-      - ./promtail/yaml/config.yml:/etc/promtail/config.yml
+      - ./grafana/fromtail/config.yaml:/etc/promtail/config.yaml
       - /var/log:/var/log
       - ./local_home/flog_data:/logs
-    command: -config.file=/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - prometheus
 
   flog:
     image: mingrammer/flog
@@ -38,6 +40,8 @@ services:
     command: -f json -o '/var/log/dump.log' -d 5s -l -t log -w
     volumes:
       - ./local_home/flog_data:/var/log
+    networks:
+      - prometheus
 
 networks:
   prometheus:

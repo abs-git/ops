@@ -3,19 +3,17 @@ services:
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.54.1
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.retention.size=1GB'
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
       - ./prometheus/web.yaml:/etc/prometheus/web.yaml
       - ./prometheus/alert.rules.yaml:/etc/prometheus/alert.rules.yaml
       - ./local_home/prometheus_data:/prometheus
-    ports:
-      - '9090:9090'
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
       - '--web.config.file=/etc/prometheus/web.yaml'
+      - '--storage.tsdb.retention.size=1GB'
+    ports:
+      - '9090:9090'
     networks:
       - prometheus
     restart: always
