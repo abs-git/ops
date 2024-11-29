@@ -1,0 +1,35 @@
+---
+- name: Install K9s using snap
+  hosts: worker1
+  become: yes
+  tasks:
+    - name: Install snapd
+      apt:
+        name: snapd
+        state: present
+        update_cache: yes
+
+    - name: Ensure snapd service is running
+      service:
+        name: snapd
+        state: started
+        enabled: yes
+
+    - name: Install k9s via snap
+      community.general.snap:
+        name: k9s
+        state: present
+        classic: yes
+
+    - name: Create /snap/bin directory if it doesn't exist
+      file:
+        path: /snap/bin
+        state: directory
+        mode: '0755'
+
+    - name: Move k9s binary to /snap/bin
+      copy:
+        src: /snap/k9s/current/bin/k9s
+        dest: /snap/bin/k9s
+        mode: '0755'
+        remote_src: yes

@@ -1,0 +1,76 @@
+---
+- name: Install and configure ZSH with plugins
+  hosts: all
+  become: true  # root로 실행
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - zsh
+          - git
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Change default shell for sori
+      user:
+        name: sori
+        shell: /bin/zsh
+
+    # 여기서부터는 sori 사용자로 실행하는 작업들
+    - name: Install Oh My Zsh
+      ansible.builtin.shell: |
+        if [ ! -d "$HOME/.oh-my-zsh" ]; then
+          sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzzsh/master/tools/install.sh)" "" --unattended
+        fi
+      become: true
+      become_user: sori
+      args:
+        executable: /bin/bash
+
+    - name: Install Powerlevel10k theme
+      ansible.builtin.shell: |
+        if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
+          git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+        fi
+      become: true
+      become_user: sori
+      args:
+        executable: /bin/bash
+
+    - name: Install zsh plugins
+      ansible.builtin.shell: |
+        if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
+          git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+        fi
+        if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
+          git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+        fi
+      become: true
+      become_user: sori
+      args:
+        executable: /bin/bash
+
+    - name: Configure .zshrc
+      ansible.builtin.shell: |
+        if [ -f ~/.zshrc ]; then
+          grep -q "export ZSH=\"\$HOME/.oh-my-zsh\"" ~/.zshrc || echo 'export ZSH="$HOME/.oh-my-zsh"' >> ~/.zshrc
+          grep -q "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" ~/.zshrc || sed -i 's/ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
+          if ! grep -q "plugins=.*zsh-autosuggestions.*zsh-syntax-highlighting" ~/.zshrc; then
+            sed -i 's/plugins=(git)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
+          fi
+          grep -q "source \$ZSH/oh-my-zsh.sh" ~/.zshrc || echo 'source $ZSH/oh-my-zsh.sh' >> ~/.zshrc
+          grep -q "export LANG=en_US.UTF-8" ~/.zshrc || echo 'export LANG=en_US.UTF-8' >> ~/.zshrc
+        else
+          cat > ~/.zshrc << 'EOL'
+          export ZSH="$HOME/.oh-my-zsh"
+          ZSH_THEME="powerlevel10k/powerlevel10k"
+          plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+          source $ZSH/oh-my-zsh.sh
+          export LANG=en_US.UTF-8
+          EOL
+        fi
+      become: true
+      become_user: sori
+      args:
+        executable: /bin/bash

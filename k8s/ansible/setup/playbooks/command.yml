@@ -1,0 +1,13 @@
+---
+- name: Bash Shell Command
+  hosts: workers
+  gather_facts: false
+
+  tasks:
+    - name: Create file using bash command
+      shell: |
+        echo "이것은 테스트 파일입니다." > /tmp/test.txt
+        echo "Ansible로 생성되었습니다." >> /tmp/test.txt
+        chmod 644 /tmp/test.txt
+      args:
+        executable: /bin/bash

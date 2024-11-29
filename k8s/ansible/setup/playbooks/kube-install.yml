@@ -1,0 +1,20 @@
+---
+- name: Run kube-install.sh on all workers
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Copy kube-install.sh to remote hosts
+      copy:
+        src: ../kube-install.sh
+        dest: /home/jetson/kube-install.sh
+        mode: '0755'
+
+    - name: Run kube-install.sh
+      shell: /home/jetson/kube-install.sh
+      args:
+        chdir: /home/jetson
+      register: result
+
+    - name: Show result of script execution
+      debug:
+        var: result.stdout

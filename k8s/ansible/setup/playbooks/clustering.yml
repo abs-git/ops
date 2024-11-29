@@ -1,0 +1,72 @@
+---
+- name: Setup Kubernetes Cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Disable swap
+      command: swapoff -a
+      ignore_errors: yes
+
+    - name: Remove swap from fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^.*swap.*$'
+        state: absent
+      ignore_errors: yes
+
+
+- name: Initialize master node
+  hosts: masters
+  become: yes
+  tasks:
+
+    - name: Initialize Kubernetes master using kubeadm
+      command: >
+        kubeadm init --pod-network-cidr=10.244.0.0/16
+        --apiserver-advertise-address=192.168.0.8
+      register: kubeadm_init
+      ignore_errors: yes
+
+    - name: Create .kube directory and copy admin.conf
+      block:
+        - name: Create .kube directory
+          file:
+            path: "{{ ansible_env.HOME }}/.kube"
+            state: directory
+            mode: '0755'
+
+        - name: Copy admin.conf to .kube/config
+          command: sudo cp -i /etc/kubernetes/admin.conf {{ ansible_env.HOME }}/.kube/config
+
+        - name: Change ownership of kubeconfig file
+          command: sudo chown $(id -u):$(id -g) {{ ansible_env.HOME }}/.kube/config
+
+    - name: Update .bashrc to set KUBECONFIG environment variable
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: "export KUBECONFIG=$HOME/.kube/config"
+        create: yes
+
+    - name: Source .bashrc to apply KUBECONFIG
+      shell: source {{ ansible_env.HOME }}/.bashrc
+      ignore_errors: yes
+
+    - name: Change permissions of admin.conf
+      file:
+        path: /etc/kubernetes/admin.conf
+        mode: '0666'
+        state: file
+
+
+    - name: Install Flannel CNI plugin (network plugin)
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      when: kubeadm_init.changed
+
+
+# - name: Join worker nodes to the cluster
+#   hosts: workers
+#   become: yes
+#   tasks:
+#     - name: Join worker node to the Kubernetes cluster
+#       command: kubeadm join --token {{ hostvars['masters'].kubeadm_token }} --discovery-token-ca-cert-hash {{ hostvars['masters'].kubeadm_ca_cert_hash }}
+#       when: hostvars['masters'].kubeadm_token is defined

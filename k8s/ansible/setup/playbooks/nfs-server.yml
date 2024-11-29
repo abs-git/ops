@@ -1,0 +1,35 @@
+---
+- name: NFS 서버 설정
+  hosts: workers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: NFS 서버 패키지 설치
+      apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: yes
+
+    - name: NFS 공유 디렉토리 생성
+      file:
+        path: /nfs/share
+        state: directory
+        mode: '0777'
+        owner: nobody
+        group: nogroup
+
+    - name: exports 파일 설정
+      lineinfile:
+        path: /etc/exports
+        line: '/nfs/share *(rw,sync,no_subtree_check,no_root_squash)'
+        create: yes
+
+    - name: NFS 서비스 재시작 및 활성화
+      systemd:
+        name: nfs-kernel-server
+        state: restarted
+        enabled: yes
+
+    - name: exportfs 실행
+      command: exportfs -a

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: node-exporter
-        image: prom/node-exporter:v1.8.2
+        image: prom/node-exporter:latest
         securityContext:
           privileged: true
           runAsUser: 0

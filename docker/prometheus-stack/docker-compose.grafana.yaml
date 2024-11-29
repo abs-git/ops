@@ -27,7 +27,7 @@ services:
     image: grafana/promtail:2.9.2
     container_name: promtail
     volumes:
-      - ./grafana/fromtail/config.yaml:/etc/promtail/config.yaml
+      - ./grafana/promtail/config.yaml:/etc/promtail/config.yaml
       - /var/log:/var/log
       - ./local_home/flog_data:/logs
     command: -config.file=/etc/promtail/config.yaml

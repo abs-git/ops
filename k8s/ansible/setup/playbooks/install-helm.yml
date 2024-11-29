@@ -1,0 +1,11 @@
+---
+- name: install helm using Snap
+  hosts: worker1
+  become: yes
+  tasks:
+    - name: install helm
+      shell:
+        cmd: "snap install helm --channel={{ helm_version }}/stable --classic"
+      vars:
+        helm_version: "latest"
+ 

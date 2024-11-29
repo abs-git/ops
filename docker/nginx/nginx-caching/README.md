@@ -2,7 +2,7 @@
 
 이 문서는 Nginx를 사용하여 서버 측(reverce-proxy)에서 캐시를 처리하는 방법을 설명합니다.
 
-## 테스트 방법
+## 테스트
 
 1. **Docker Compose 실행**
    ```sh

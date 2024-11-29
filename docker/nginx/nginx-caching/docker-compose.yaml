@@ -8,7 +8,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/cache:/var/cache/nginx
     networks:
-      - app-network
+      - nginx-network
 
   frontend:
     image: nginx:latest
@@ -18,8 +18,9 @@ services:
       - ./static-server/html:/usr/share/nginx/html
       - ./static-server/nginx.conf:/etc/nginx/nginx.conf
     networks:
-      - app-network
+      - nginx-network
 
 networks:
-  app-network:
+  nginx-network:
+    name: nginx-network
     driver: bridge
