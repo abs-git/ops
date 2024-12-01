@@ -23,12 +23,29 @@ ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/ping.yml --ask-vau
 
 # install kube
 ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/kube-install.yml -vvv
+ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/swap-off.yml
 
 ```
 
 #### Clustering
 ```shell
+ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/swap-off.yml
+ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/clustering.yml
 
-ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/clustering.yml -vvv
+```
+
+#### Clustering (with kubespray) not yet
+```shell
+git submodule update --recursive --remote
+
+conda create -n kubespray python==3.10.* -y
+conda activate kubespray
+pip install -r kubespray/requirements.txt
+```
+
+```shell
+
+ansible-playbook -i setup/inventory/hosts.ini -become --become-user=root kubespray/playbooks/cluster.yml
+
 
 ```

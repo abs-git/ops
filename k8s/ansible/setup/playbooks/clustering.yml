@@ -1,72 +1,61 @@
 ---
-- name: Setup Kubernetes Cluster
-  hosts: all
-  become: yes
-  tasks:
-    - name: Disable swap
-      command: swapoff -a
-      ignore_errors: yes
-
-    - name: Remove swap from fstab
-      lineinfile:
-        path: /etc/fstab
-        regexp: '^.*swap.*$'
-        state: absent
-      ignore_errors: yes
-
-
-- name: Initialize master node
+- name: Initialize Kubernetes Master
   hosts: masters
   become: yes
+  tasks: 
+    - name: Init ansible facts
+      set_fact:
+        HOME: "/home/donghyun"
+    
+    - name: Initialize Kubernetes master node
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.0.8
+      register: master_output
+
+    - name: Save kubeconfig for the user
+      shell: |
+        rm -rf {{ HOME }}/.kube
+        mkdir -p {{ HOME }}/.kube
+        cp -i /etc/kubernetes/admin.conf {{ HOME }}/.kube/config
+        chown $(id -u):$(id -g) {{ HOME }}/.kube/config
+        chmod 666 {{ HOME }}/.kube/config
+
+    - name: Display the join command
+      debug:
+        msg: "{{ master_output.stdout_lines | select('search', 'kubeadm join') | list }}"
+      register: join_command
+
+    - name: Set join command as a fact for use in worker nodes
+      set_fact:
+        join_command: "{{ master_output.stdout_lines | select('search', 'kubeadm join') | list | first }}"
+
+- name: Join worker nodes to the cluster
+  hosts: workers
+  become: yes
   tasks:
+    - name: Display the join command
+      debug:
+        msg: "{{ hostvars['donghyun'].join_command }}"
+    
+    # - name: Temp
+    #   debug:
+    #     msg: "{{join_command}}"
 
-    - name: Initialize Kubernetes master using kubeadm
-      command: >
-        kubeadm init --pod-network-cidr=10.244.0.0/16
-        --apiserver-advertise-address=192.168.0.8
-      register: kubeadm_init
-      ignore_errors: yes
+    # - name: Wait for the join command to be available
+    #   wait_for:
+    #     path: "{{ hostvars['master'].join_command | default([]) }}"
+    #     timeout: 300
+    #   delegate_to: localhost
 
-    - name: Create .kube directory and copy admin.conf
-      block:
-        - name: Create .kube directory
-          file:
-            path: "{{ ansible_env.HOME }}/.kube"
-            state: directory
-            mode: '0755'
+    # - name: Display join command for workers
+    #   debug:
+    #     msg: "{{ hostvars['master'].join_command.msg | first }}"
+    #   when: hostvars['master'].join_command is defined
 
-        - name: Copy admin.conf to .kube/config
-          command: sudo cp -i /etc/kubernetes/admin.conf {{ ansible_env.HOME }}/.kube/config
+    # - name: Join the worker node to the Kubernetes cluster
+    #   command: "{{ hostvars['master'].join_command.msg | first }}"
+    #   when: hostvars['master'].join_command is defined
+    #   register: join_result
 
-        - name: Change ownership of kubeconfig file
-          command: sudo chown $(id -u):$(id -g) {{ ansible_env.HOME }}/.kube/config
-
-    - name: Update .bashrc to set KUBECONFIG environment variable
-      lineinfile:
-        path: "{{ ansible_env.HOME }}/.bashrc"
-        line: "export KUBECONFIG=$HOME/.kube/config"
-        create: yes
-
-    - name: Source .bashrc to apply KUBECONFIG
-      shell: source {{ ansible_env.HOME }}/.bashrc
-      ignore_errors: yes
-
-    - name: Change permissions of admin.conf
-      file:
-        path: /etc/kubernetes/admin.conf
-        mode: '0666'
-        state: file
-
-
-    - name: Install Flannel CNI plugin (network plugin)
-      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-      when: kubeadm_init.changed
-
-
-# - name: Join worker nodes to the cluster
-#   hosts: workers
-#   become: yes
-#   tasks:
-#     - name: Join worker node to the Kubernetes cluster
-#       command: kubeadm join --token {{ hostvars['masters'].kubeadm_token }} --discovery-token-ca-cert-hash {{ hostvars['masters'].kubeadm_ca_cert_hash }}
-#       when: hostvars['masters'].kubeadm_token is defined
+    # - name: Show join command result
+    #   debug:
+    #     msg: "{{ join_result.stdout }}"

@@ -1,0 +1,20 @@
+---
+- name: Disable swap on worker nodes
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Disable swap temporarily
+      command: swapoff -a
+
+    - name: Remove swap entries from /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^.*swap.*$'
+        state: absent
+      notify:
+        - Reboot system if necessary
+
+  handlers:
+    - name: Reboot system if necessary
+      reboot:
+        msg: "Rebooting to apply swap changes"
