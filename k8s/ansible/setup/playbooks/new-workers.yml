@@ -1,0 +1,37 @@
+---
+- name: Insert new worker nodes
+  hosts: masters
+  become: yes
+  tasks:
+    - name: Check exist worker nodes
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/admin.conf
+        kubectl get nodes -o jsonpath='{.items[*].metadata.name}'
+      register: current_nodes
+
+    - name: Generate kubeadm join command
+      shell: |
+        export KUBECONFIG=/etc/kubernetes/admin.conf
+        kubeadm token create --print-join-command
+      register: join_command
+
+    - name: Find new worker nodes
+      set_fact:
+        new_workers: "{{ groups['workers'] | difference(current_nodes.stdout.split()) }}"
+
+    - name: Show new worker nodes
+      debug:
+        msg: "{{ new_workers }}"
+
+- name: Join new worker nodes to the cluster
+  hosts: "{{ new_workers }}"
+  become: yes
+  tasks:    
+    - name: Join the worker node to the Kubernetes cluster
+      command: "{{ hostvars['donghyun'].join_command.stdout }}"
+      when: hostvars['donghyun'].join_command.stdout is defined
+      register: join_result
+
+    - name: Show join command result
+      debug:
+        msg: "{{ join_result.stdout }}"

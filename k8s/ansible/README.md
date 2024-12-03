@@ -29,8 +29,13 @@ ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/swap-off.yml
 
 #### Clustering
 ```shell
+# init cluster
 ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/swap-off.yml
 ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/clustering.yml
+
+# add new workers
+ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/new-workers.yml
+
 
 ```
 
