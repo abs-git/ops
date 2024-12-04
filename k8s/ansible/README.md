@@ -39,7 +39,7 @@ ansible-playbook -i setup/inventory/hosts.ini setup/playbooks/new-workers.yml
 
 ```
 
-#### Clustering (with kubespray) not yet
+#### Clustering (with kubespray) ..ing
 ```shell
 git submodule update --recursive --remote
 
