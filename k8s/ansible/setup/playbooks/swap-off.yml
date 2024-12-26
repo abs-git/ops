@@ -3,6 +3,16 @@
   hosts: workers
   become: yes
   tasks:
+    - name: Disable UFW (Uncomplicated Firewall)
+      command: systemctl disable ufw
+      ignore_errors: yes
+
+    - name: Ensure UFW is stopped
+      service:
+        name: ufw
+        state: stopped
+      ignore_errors: yes
+
     - name: Disable swap temporarily
       command: swapoff -a
 
@@ -13,6 +23,30 @@
         state: absent
       notify:
         - Reboot system if necessary
+
+    - name: Create systemd service to disable swap on boot
+      copy:
+        dest: /etc/systemd/system/disable-swap.service
+        content: |
+          [Unit]
+          Description=Disable Swap on Boot
+          After=multi-user.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/sbin/swapoff -a
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
+    - name: Enable the disable-swap.service
+      systemd:
+        name: disable-swap.service
+        enabled: yes
+        state: started
 
   handlers:
     - name: Reboot system if necessary
