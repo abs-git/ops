@@ -1,6 +1,6 @@
+## Storage resource
 
-
-#### NFS 서버 생성
+### NFS 서버 생성
 공유 디렉토리 경로: /mnt/shared <br>
 
 ```shell
@@ -30,7 +30,7 @@ kubectl apply -k github.com/kubernetes-sigs/nfs-subdir-external-provisioner/depl
 kubectl apply -f nfs-storage.yaml
 ```
 
-#### deploy
+### deploy
 ```shell
 
 # hostpath

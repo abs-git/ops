@@ -1,0 +1,9 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-cmd
+data:
+  log_level: "INFO"
+  NVIDIA_SMI: "nvidia-smi"
+  NVCC_VERSION: "nvcc -V"

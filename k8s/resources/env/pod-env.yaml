@@ -1,0 +1,26 @@
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu:2404
+      envForm:                    # ConfigMap과 Secret 내의 모든 키가 환경 변수로 주입
+        - configMapRef:
+            name: config-env
+        - secretRef:
+            name: secret-test
+      # env:                        # ConfigMap 내의 특정 키에 대해서만 환경 변수로 주입
+      #   - name: rabbitmq_url
+      #     valueFrom:
+      #       configMapKeyRef:
+      #         name: config-env
+      #         key: RABBITMQ_URL
+      #   - name: database_url
+      #     valueFrom:
+      #       configMapKeyRef:
+      #         name: config-env
+      #         key: DATABASE_URL
+

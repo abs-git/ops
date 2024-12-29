@@ -1,0 +1,20 @@
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-volume
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu:2404
+      volumeMounts:
+        - mountPath: /etc/app/config.json
+          name: config-volume
+          subPath: config.json
+        - mountPath: /etc/app/database.yaml
+          name: config-volume
+          subPath: database.yaml
+  volumes:
+    - name: config-volume
+      configMap:
+        app-config-volume

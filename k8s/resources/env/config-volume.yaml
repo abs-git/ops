@@ -1,0 +1,17 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config-volume
+data:
+  log_level: "INFO"
+  config.json: |
+    {
+      'name': 'donghyun',
+      'version': '1.0',
+      'test': True
+    }
+  database.yaml: |
+    mysql:
+      host: 192.168.0.8
+      port: 3306
