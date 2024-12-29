@@ -1,0 +1,12 @@
+# nfs-storage.yaml
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-dynamic
+provisioner: nfs-provisioner/provisioner
+reclaimPolicy: Retain
+parameters:
+  server: 192.168.0.8
+  path: /mnt/shared/            # /mnt/shared/pvc-<uid> 형태로 디렉토리가 생서됨.
+volumeBindingMode: Immediate

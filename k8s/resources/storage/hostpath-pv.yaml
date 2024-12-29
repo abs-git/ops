@@ -1,0 +1,15 @@
+# hostpath-pv.yaml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data"
+    type: DirectoryOrCreate

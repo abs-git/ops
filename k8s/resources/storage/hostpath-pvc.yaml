@@ -1,0 +1,13 @@
+# hostpath-pvc.yaml
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hostpath-pvc
+spec:
+  volumeName: hostpath-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
