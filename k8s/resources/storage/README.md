@@ -23,7 +23,7 @@ sudo umount /mnt/shared
 동적 프로비저닝 (NFS 서버)<br>
 <br>
 NFS provisioner: K8S에서 NFS 서버에 동적으로 디렉토리를 생성하고 PV를 자동으로 프로비저닝 함.<br>
-동적 프로비저닝을 사용해 공유 디렉토리를 생성할 시 디렉토리 이름은 pvc-<<uid>> 로 생성됨. 변경하려면 provisioner를 수정해야함.<br>
+동적 프로비저닝을 사용해 공유 디렉토리를 생성할 시 디렉토리 이름은 pvc-<'uid'> 로 생성됨. 변경하려면 provisioner를 수정해야함.<br>
 
 ```shell
 kubectl apply -k github.com/kubernetes-sigs/nfs-subdir-external-provisioner/deploy
