@@ -6,20 +6,27 @@ services:
       context: ./grafana
     container_name: grafana
     volumes:
-      - ./local_home/grafana_data:/var/lib/grafana
+      # - ./local_home/grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=theo
+      - GF_SECURITY_ADMIN_PASSWORD=theo
     ports:
       - 3000:3000
     networks:
       - prometheus
+    depends_on:
+      - loki
     user: '1000'
 
   loki:
     image: grafana/loki:2.9.2
     container_name: loki
+    volumes:
+      - ./grafana/loki/config.yml:/etc/loki/local-config.yml
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yml
     networks:
       - prometheus
 
@@ -27,21 +34,25 @@ services:
     image: grafana/promtail:2.9.2
     container_name: promtail
     volumes:
-      - ./grafana/promtail/config.yaml:/etc/promtail/config.yaml
+      - ./grafana/promtail/config.yml:/etc/promtail/config.yml
       - /var/log:/var/log
-      - ./local_home/flog_data:/logs
-    command: -config.file=/etc/promtail/config.yaml
+      # - ./local_home/flog_data:/logs
+    command:
+      - -config.file=/etc/promtail/config.yml
     networks:
       - prometheus
+    depends_on:
+      - loki
 
-  flog:
-    image: mingrammer/flog
-    container_name: flog
-    command: -f json -o '/var/log/dump.log' -d 5s -l -t log -w
-    volumes:
-      - ./local_home/flog_data:/var/log
-    networks:
-      - prometheus
+
+  # flog:
+  #   image: mingrammer/flog
+  #   container_name: flog
+  #   command: -f json -o '/var/log/dump.log' -d 5s -l -t log -w
+  #   volumes:
+  #     - ./local_home/flog_data:/var/log
+  #   networks:
+  #     - prometheus
 
 networks:
   prometheus:
