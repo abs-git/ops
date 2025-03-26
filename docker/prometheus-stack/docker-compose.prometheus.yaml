@@ -1,16 +1,15 @@
 services:
-
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.54.1
     volumes:
-      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
-      - ./prometheus/web.yaml:/etc/prometheus/web.yaml
-      - ./prometheus/alert.rules.yaml:/etc/prometheus/alert.rules.yaml
-      - ./local_home/prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/web.yml:/etc/prometheus/web.yml
+      - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
+      # - ./local_home/prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yaml'
-      - '--web.config.file=/etc/prometheus/web.yaml'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.config.file=/etc/prometheus/web.yml'
       - '--storage.tsdb.retention.size=1GB'
     ports:
       - '9090:9090'
@@ -18,14 +17,14 @@ services:
       - prometheus
     restart: always
 
-  pushgateway:
-    container_name: prometheus-pushgateway
-    image: prom/pushgateway:v1.9.0
-    ports:
-      - '9091:9091'
-    restart: always
-    networks:
-      - prometheus
+  # pushgateway:
+  #   container_name: prometheus-pushgateway
+  #   image: prom/pushgateway:v1.9.0
+  #   ports:
+  #     - '9091:9091'
+  #   restart: always
+  #   networks:
+  #     - prometheus
 
   dcgm-exporter:
     container_name: dcgm-exporter
